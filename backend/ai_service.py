@@ -182,3 +182,136 @@ async def chat_with_ai(
         "data": all_query_data,
         "tool_calls": tool_calls_log,
     }
+
+
+# ── SSE 流式版本 ─────────────────────────────────────────────────
+async def chat_with_ai_stream(
+    user_message: str,
+    history: list[dict],
+    execute_query_fn,
+):
+    """
+    流式 AI 问答：逐步 yield 事件，前端可实时渲染。
+    事件类型：
+    - {"type": "tool_call", ...}  — AI 调用了查询工具
+    - {"type": "tool_result", ...} — 查询结果
+    - {"type": "token", "content": "..."} — 流式文本 token
+    - {"type": "done", "answer": ..., "data": ..., "tool_calls": ...} — 完成
+    - {"type": "error", "message": "..."} — 错误
+    """
+    if not DEEPSEEK_API_KEY:
+        yield {"type": "error", "message": "未配置 DEEPSEEK_API_KEY，请设置环境变量后重启服务。"}
+        return
+
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    messages.extend(history)
+    messages.append({"role": "user", "content": user_message})
+
+    tool_calls_log = []
+    all_query_data = []
+
+    async with httpx.AsyncClient(timeout=60) as client:
+        # 第一轮：可能触发 function calling
+        resp = await client.post(
+            f"{DEEPSEEK_BASE_URL}/chat/completions",
+            headers={
+                "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": "deepseek-chat",
+                "messages": messages,
+                "tools": TOOLS,
+                "tool_choice": "auto",
+                "temperature": 0.1,
+                "max_tokens": 2000,
+            },
+        )
+
+        if resp.status_code != 200:
+            yield {"type": "error", "message": f"AI 服务错误 (HTTP {resp.status_code})"}
+            return
+
+        result = resp.json()
+        choice = result["choices"][0]
+        message = choice["message"]
+
+        if message.get("tool_calls"):
+            messages.append(message)
+
+            for tc in message["tool_calls"]:
+                fn_name = tc["function"]["name"]
+                fn_args = json.loads(tc["function"]["arguments"])
+
+                tool_call_info = {"function": fn_name, "arguments": fn_args}
+                tool_calls_log.append(tool_call_info)
+                yield {"type": "tool_call", **tool_call_info}
+
+                query_result = execute_query_fn(**fn_args)
+                all_query_data.extend(query_result)
+                yield {"type": "tool_result", "function": fn_name, "count": len(query_result)}
+
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tc["id"],
+                    "content": json.dumps(query_result, ensure_ascii=False),
+                })
+
+            # 第二轮：流式回答
+            resp2 = await client.stream(
+                "POST",
+                f"{DEEPSEEK_BASE_URL}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": "deepseek-chat",
+                    "messages": messages,
+                    "temperature": 0.1,
+                    "max_tokens": 2000,
+                    "stream": True,
+                },
+            )
+
+            if resp2.status_code != 200:
+                yield {"type": "error", "message": f"AI 二次调用错误 (HTTP {resp2.status_code})"}
+                return
+
+            full_answer = ""
+            async for line in resp2.aiter_lines():
+                if not line.startswith("data: "):
+                    continue
+                data_str = line[6:]
+                if data_str.strip() == "[DONE]":
+                    break
+                try:
+                    chunk = json.loads(data_str)
+                    delta = chunk["choices"][0].get("delta", {})
+                    token = delta.get("content", "")
+                    if token:
+                        full_answer += token
+                        yield {"type": "token", "content": token}
+                except (json.JSONDecodeError, KeyError, IndexError):
+                    continue
+
+            yield {
+                "type": "done",
+                "answer": full_answer,
+                "data": all_query_data,
+                "tool_calls": tool_calls_log,
+            }
+        else:
+            # 无工具调用，直接流式回答
+            answer = message.get("content", "")
+            if answer:
+                # 逐字模拟流式（因为第一轮不是 stream）
+                for char in answer:
+                    yield {"type": "token", "content": char}
+
+            yield {
+                "type": "done",
+                "answer": answer,
+                "data": [],
+                "tool_calls": [],
+            }

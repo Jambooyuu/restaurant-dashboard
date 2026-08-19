@@ -10,6 +10,7 @@ from typing import Optional
 
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 # ── 数据库路径 ──────────────────────────────────────────────────
@@ -348,7 +349,7 @@ class ChatResponse(BaseModel):
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat_endpoint(req: ChatRequest):
     """
-    AI 问答入口。DeepSeek 理解问题 → function calling 查数据库 → 基于真实数据回答。
+    AI 问答入口（非流式）。DeepSeek 理解问题 → function calling 查数据库 → 基于真实数据回答。
     """
     from backend.ai_service import chat_with_ai
 
@@ -358,6 +359,34 @@ async def chat_endpoint(req: ChatRequest):
         execute_query_fn=query_sales_data,
     )
     return ChatResponse(**result)
+
+
+@app.post("/api/chat/stream")
+async def chat_stream_endpoint(req: ChatRequest):
+    """
+    AI 问答入口（SSE 流式）。逐步返回 AI 回答，支持前端实时渲染。
+    """
+    from backend.ai_service import chat_with_ai_stream
+    import json
+
+    async def event_generator():
+        async for chunk in chat_with_ai_stream(
+            user_message=req.message,
+            history=req.history,
+            execute_query_fn=query_sales_data,
+        ):
+            yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 # ── 门店名/商品名映射查询（供 AI 或前端使用）────────────────────
