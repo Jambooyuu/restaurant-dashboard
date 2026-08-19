@@ -9,19 +9,21 @@ venv/
 # Node
 node_modules/
 dist/
+.npm-cache/
+frontend/.pnpm-*
+esbuild-patch.cjs
 
 # IDE
 .vscode/
 .idea/
 *.swp
 
-# Old projects (not part of this repo)
+# Temp / old projects
 purchase-order-system/
 purchase-order-system.zip
-
-# Scan scripts (temp analysis)
-scan_dirty.py
-scan_dirty2.py
+install_deps*.py
+scan_dirty*.py
+start.bat
 
 # OS
 .DS_Store
