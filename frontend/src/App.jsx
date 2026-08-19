@@ -5,6 +5,7 @@ import TopProductsTable from './components/TopProductsTable'
 import StoreComparison from './components/StoreComparison'
 import CategoryPie from './components/CategoryPie'
 import PaymentPie from './components/PaymentPie'
+import StoreRadar from './components/StoreRadar'
 import ChatPanel from './components/ChatPanel'
 
 const API_BASE = '/api'
@@ -159,6 +160,17 @@ export default function App() {
           <div className="chart-card">
             <div className="chart-title">💳 支付方式分布</div>
             <PaymentPie data={paymentData} />
+          </div>
+        </div>
+
+        {/* ── 门店雷达图（第三关创新） ── */}
+        <div className="charts-grid">
+          <div className="chart-card full-width">
+            <div className="chart-title">🎯 门店多维度雷达对比</div>
+            <p style={{ fontSize: 12, color: '#94a3b8', marginBottom: 12 }}>
+              从营业额、订单数、客单价、日均营收四个维度对比各门店综合实力
+            </p>
+            <StoreRadar data={storeComp} startDate={startDate} endDate={endDate} />
           </div>
         </div>
 
