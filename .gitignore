@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Old projects (not part of this repo)
+purchase-order-system/
+purchase-order-system.zip
+
+# Scan scripts (temp analysis)
+scan_dirty.py
+scan_dirty2.py
+
+# OS
+.DS_Store
+Thumbs.db
