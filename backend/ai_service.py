@@ -9,6 +9,16 @@ import os
 import httpx
 from datetime import datetime, timedelta
 
+# 加载 .env 文件（支持 UTF-8 BOM 和 UTF-16）
+try:
+    from dotenv import load_dotenv
+    import pathlib
+    _env_path = pathlib.Path(__file__).resolve().parent.parent / ".env"
+    if _env_path.exists():
+        load_dotenv(_env_path, encoding="utf-8-sig")
+except Exception:
+    pass
+
 # DeepSeek API 配置
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1"
