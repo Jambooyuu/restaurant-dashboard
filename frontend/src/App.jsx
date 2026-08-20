@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import RevenueChart from './components/RevenueChart'
 import TopProductsTable from './components/TopProductsTable'
 import StoreComparison from './components/StoreComparison'
@@ -88,6 +88,10 @@ export default function App() {
   const [catPerf, setCatPerf] = useState([])
   const [payData, setPayData] = useState([])
   const [loading, setLoading] = useState(false)
+  const contentRef = useRef(null)
+
+  const scrollTop = () => contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+  const scrollToAi = () => document.getElementById('ai-section')?.scrollIntoView({ behavior: 'smooth' })
 
   useEffect(() => { fetch(`${API}/stores`).then(r => r.json()).then(setStores) }, [])
 
@@ -119,11 +123,11 @@ export default function App() {
 
         <div className="sidebar-section">
           <div className="sidebar-label">概览</div>
-          <button className="nav-item active">
+          <button className="nav-item active" onClick={scrollTop}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
             数据看板
           </button>
-          <button className="nav-item" onClick={() => document.getElementById('ai-section')?.scrollIntoView({ behavior: 'smooth' })}>
+          <button className="nav-item" onClick={scrollToAi}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
             AI 问答
           </button>
@@ -132,13 +136,13 @@ export default function App() {
         <div className="sidebar-section">
           <div className="sidebar-label">门店</div>
           <button className={`nav-item ${!storeFilter ? 'active' : ''}`}
-            onClick={() => setStoreFilter('')}>
+            onClick={() => { setStoreFilter(''); scrollTop() }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
             全部门店
           </button>
           {stores.map(s => (
             <button key={s.store_id} className={`nav-item ${storeFilter === s.store_id ? 'active' : ''}`}
-              onClick={() => setStoreFilter(storeFilter === s.store_id ? '' : s.store_id)}>
+              onClick={() => { setStoreFilter(storeFilter === s.store_id ? '' : s.store_id); scrollTop() }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
               {s.store_name}
               <span className="nav-badge">{s.district?.split('·')[1] || s.store_id}</span>
@@ -147,7 +151,7 @@ export default function App() {
         </div>
 
         <div className="sidebar-footer">
-          <button className="nav-item" onClick={() => { setStoreFilter(''); setStartDate('2026-05-01'); setEndDate('2026-07-31') }}>
+          <button className="nav-item" onClick={() => { setStoreFilter(''); setStartDate('2026-05-01'); setEndDate('2026-07-31'); scrollTop() }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 12a9 9 0 109-9"/><polyline points="3 3 3 9 9 9"/></svg>
             重置筛选
           </button>
@@ -168,7 +172,7 @@ export default function App() {
           <div className="topbar-avatar">JD</div>
         </header>
 
-        <div className="content">
+        <div className="content" ref={contentRef}>
           {/* ── KPI Row ── */}
           <div className="kpi-grid">
             <KPICard label="总营业额" value={`¥${fmtMoney(sum.total_revenue || 0)}`}
