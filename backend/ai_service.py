@@ -438,19 +438,18 @@ async def chat_with_ai_stream(
                 })
 
             # 流式回答
-            resp2 = await client.stream(
+            full_answer = ""
+            async with client.stream(
                 "POST",
                 f"{DEEPSEEK_BASE_URL}/chat/completions",
                 headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}", "Content-Type": "application/json"},
                 json={"model": "deepseek-chat", "messages": messages, "temperature": 0.1, "max_tokens": 2000, "stream": True},
-            )
+            ) as resp2:
+                if resp2.status_code != 200:
+                    yield {"type": "error", "message": f"AI 二次调用错误 (HTTP {resp2.status_code})"}
+                    return
 
-            if resp2.status_code != 200:
-                yield {"type": "error", "message": f"AI 二次调用错误 (HTTP {resp2.status_code})"}
-                return
-
-            full_answer = ""
-            async for line in resp2.aiter_lines():
+                async for line in resp2.aiter_lines():
                 if not line.startswith("data: "):
                     continue
                 data_str = line[6:]
