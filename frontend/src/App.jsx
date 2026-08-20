@@ -179,13 +179,13 @@ export default function App() {
             </Section>
           </div>
 
-          {/* Radar */}
-          <Section title="🎯 门店多维度雷达对比" subtitle="从营业额、订单数、客单价、日均营收四维度对比各门店综合实力">
-            <StoreRadar data={storeComp} startDate={startDate} endDate={endDate} />
-          </Section>
-
-          {/* AI Chat */}
-          <ChatPanel />
+          {/* Radar + AI Chat side by side */}
+          <div className="grid-2">
+            <Section title="🎯 门店多维度雷达对比" subtitle="营业额 · 订单数 · 客单价 · 日均营收">
+              <StoreRadar data={storeComp} startDate={startDate} endDate={endDate} />
+            </Section>
+            <ChatPanel />
+          </div>
         </div>
       </div>
     </div>

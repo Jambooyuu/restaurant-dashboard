@@ -184,7 +184,7 @@ body {
 .chat-panel {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 8px; display: flex; flex-direction: column;
-  height: 560px; overflow: hidden;
+  height: 100%; min-height: 420px; overflow: hidden;
 }
 .chat-header {
   padding: 16px 20px; border-bottom: 1px solid var(--border);
