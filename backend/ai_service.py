@@ -450,19 +450,19 @@ async def chat_with_ai_stream(
                     return
 
                 async for line in resp2.aiter_lines():
-                if not line.startswith("data: "):
-                    continue
-                data_str = line[6:]
-                if data_str.strip() == "[DONE]":
-                    break
-                try:
-                    chunk = json.loads(data_str)
-                    token = chunk["choices"][0].get("delta", {}).get("content", "")
-                    if token:
-                        full_answer += token
-                        yield {"type": "token", "content": token}
-                except (json.JSONDecodeError, KeyError, IndexError):
-                    continue
+                    if not line.startswith("data: "):
+                        continue
+                    data_str = line[6:]
+                    if data_str.strip() == "[DONE]":
+                        break
+                    try:
+                        chunk = json.loads(data_str)
+                        token = chunk["choices"][0].get("delta", {}).get("content", "")
+                        if token:
+                            full_answer += token
+                            yield {"type": "token", "content": token}
+                    except (json.JSONDecodeError, KeyError, IndexError):
+                        continue
 
             yield {"type": "done", "answer": full_answer, "data": all_query_data, "tool_calls": tool_calls_log}
         else:
