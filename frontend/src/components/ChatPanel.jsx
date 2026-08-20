@@ -185,18 +185,16 @@ export default function ChatPanel() {
     <div className="chat-panel">
       <div className="chat-header">
         🤖 AI 数据问答
-        <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 400, marginLeft: 8 }}>
-          所有数字来自数据库真实查询 · 支持流式输出
-        </span>
+        <span className="badge">真实查询 · 流式输出</span>
       </div>
 
       <div className="chat-messages">
         {messages.map((msg, i) => (
-          <div key={i} className={`message ${msg.role}`}>
+          <div key={i} className={`msg ${msg.role}`}>
             {msg.content}
-            {msg.streaming && <span className="streaming-cursor">▊</span>}
+            {msg.streaming && <span className="cursor-blink">▊</span>}
             {msg.data && msg.data.length > 0 && !msg.streaming && (
-              <div className="message-data">
+              <div className="msg-data">
                 📊 查询结果 ({msg.data.length} 条):<br />
                 {msg.data.slice(0, 10).map((d, j) => (
                   <div key={j}>
@@ -207,8 +205,8 @@ export default function ChatPanel() {
               </div>
             )}
             {msg.toolCalls && msg.toolCalls.length > 0 && !msg.streaming && (
-              <div className="message-data" style={{ marginTop: 4 }}>
-                🔧 调用了: {msg.toolCalls.map((tc, idx) =>
+              <div className="msg-data" style={{ marginTop: 4 }}>
+                🔧 调用了: {msg.toolCalls.map((tc) =>
                   `${tc.function}(${Object.entries(tc.arguments || {}).map(([k,v]) => `${k}=${v}`).join(', ')})`
                 ).join(' → ')}
               </div>
@@ -216,7 +214,7 @@ export default function ChatPanel() {
           </div>
         ))}
         {loading && !messages[messages.length - 1]?.streaming && (
-          <div className="message assistant">
+          <div className="msg assistant">
             <div className="loading">
               <div className="spinner" /> 正在查询数据库并生成回答…
             </div>
@@ -225,9 +223,9 @@ export default function ChatPanel() {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="quick-questions">
+      <div className="chat-quick">
         {QUICK_QUESTIONS.map((q, i) => (
-          <button key={i} className="quick-q" onClick={() => sendMessage(q)}>
+          <button key={i} className="quick-btn" onClick={() => sendMessage(q)}>
             {q}
           </button>
         ))}
@@ -240,11 +238,11 @@ export default function ChatPanel() {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="输入你的数据问题，例如：七月份哪个门店业绩最好？"
+          placeholder="输入你的数据问题…"
           disabled={loading}
         />
         <button
-          className="chat-send-btn"
+          className="send-btn"
           onClick={() => sendMessage()}
           disabled={loading || !input.trim()}
         >

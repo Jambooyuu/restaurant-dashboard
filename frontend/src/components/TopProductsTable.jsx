@@ -1,10 +1,10 @@
 export default function TopProductsTable({ data }) {
   if (!data || data.length === 0) {
-    return <div style={{ padding: 20, color: '#94a3b8', textAlign: 'center' }}>暂无数据</div>
+    return <div style={{ padding: 40, color: 'var(--subtle)', textAlign: 'center', fontSize: 13 }}>暂无数据</div>
   }
 
   return (
-    <table>
+    <table className="data-table">
       <thead>
         <tr>
           <th style={{ width: 40 }}>#</th>
@@ -18,24 +18,14 @@ export default function TopProductsTable({ data }) {
         {data.map((item, i) => (
           <tr key={item.product_id}>
             <td>
-              <span className={`rank-badge ${i < 3 ? `rank-${i+1}` : 'rank-other'}`}>
+              <span className={`rank ${i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n'}`}>
                 {i + 1}
               </span>
             </td>
             <td style={{ fontWeight: 500 }}>{item.product_name}</td>
-            <td>
-              <span style={{
-                padding: '2px 8px',
-                borderRadius: 4,
-                fontSize: 12,
-                background: '#f1f5f9',
-                color: '#64748b',
-              }}>
-                {item.product_category}
-              </span>
-            </td>
+            <td><span className="tag">{item.product_category}</span></td>
             <td style={{ textAlign: 'right' }}>{item.total_qty}</td>
-            <td style={{ textAlign: 'right', fontWeight: 600 }}>
+            <td style={{ textAlign: 'right', fontWeight: 500 }}>
               ¥{item.total_revenue.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}
             </td>
           </tr>
