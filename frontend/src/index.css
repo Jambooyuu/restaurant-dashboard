@@ -13,28 +13,28 @@ code, pre, kbd, .font-mono {
   font-family: "Geist Mono", ui-monospace, monospace;
 }
 
-/* ── Color Tokens (oklch) ── */
+/* ── Color Tokens (oklch, light mode) ── */
 :root {
-  --bg: oklch(7% 0 0);
-  --surface: oklch(10% 0 0);
-  --surface-2: oklch(13% 0 0);
-  --border: oklch(100% 0 0 / 8%);
-  --border-hover: oklch(100% 0 0 / 14%);
-  --fg: oklch(98% 0 0);
-  --muted: oklch(55% 0 0);
-  --subtle: oklch(35% 0 0);
-  --accent: oklch(65% 0.2 250);
-  --accent-muted: oklch(65% 0.2 250 / 12%);
-  --accent-border: oklch(65% 0.2 250 / 25%);
-  --green: oklch(72% 0.17 145);
-  --green-bg: oklch(45% 0.14 145 / 15%);
-  --green-border: oklch(55% 0.14 145 / 30%);
-  --red: oklch(72% 0.18 25);
-  --red-bg: oklch(45% 0.18 25 / 15%);
-  --red-border: oklch(55% 0.18 25 / 30%);
-  --amber: oklch(82% 0.16 85);
-  --amber-bg: oklch(60% 0.16 85 / 15%);
-  --amber-border: oklch(65% 0.16 85 / 30%);
+  --bg: oklch(98% 0 0);
+  --surface: oklch(100% 0 0);
+  --surface-2: oklch(96% 0 0);
+  --border: oklch(0% 0 0 / 8%);
+  --border-hover: oklch(0% 0 0 / 14%);
+  --fg: oklch(10% 0 0);
+  --muted: oklch(45% 0 0);
+  --subtle: oklch(65% 0 0);
+  --accent: oklch(55% 0.2 250);
+  --accent-muted: oklch(55% 0.2 250 / 8%);
+  --accent-border: oklch(55% 0.2 250 / 20%);
+  --green: oklch(45% 0.17 145);
+  --green-bg: oklch(95% 0.05 145);
+  --green-border: oklch(85% 0.1 145);
+  --red: oklch(50% 0.18 25);
+  --red-bg: oklch(95% 0.05 25);
+  --red-border: oklch(85% 0.1 25);
+  --amber: oklch(50% 0.14 85);
+  --amber-bg: oklch(95% 0.05 85);
+  --amber-border: oklch(85% 0.1 85);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -75,7 +75,7 @@ body {
   cursor: pointer; transition: all 100ms ease;
   border: none; background: none; width: 100%; text-align: left;
 }
-.nav-item:hover { background: oklch(100% 0 0 / 4%); color: var(--fg); }
+.nav-item:hover { background: var(--surface-2); color: var(--fg); }
 .nav-item.active { background: var(--surface); color: var(--fg); font-weight: 500; }
 .nav-badge {
   margin-left: auto; background: var(--border); color: var(--muted);
@@ -163,7 +163,7 @@ body {
 }
 .data-table tbody tr:last-child td { border-bottom: none; }
 .data-table tbody tr { transition: background 100ms ease; }
-.data-table tbody tr:hover { background: oklch(100% 0 0 / 3%); }
+.data-table tbody tr:hover { background: var(--surface-2); }
 
 /* ── Rank / Tag / Badge ── */
 .rank {
